@@ -1,9 +1,13 @@
 package com.example.uuser.eatingplace;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -48,6 +52,17 @@ public class PlaceListActivity extends ActionBarActivity {
         initViews();
     }
 
+    /*
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //menu.clear();
+        super.onCreateOptionsMenu(menu, inflater);
+
+        getSupportActionBar().getMenuInflater().inflate(R.menu.shopping, menu);
+
+    }
+
+*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -83,11 +98,14 @@ public class PlaceListActivity extends ActionBarActivity {
                 float ratingValue = Float.parseFloat(placeObject.getPlaceRating());
                 rating.setRating(ratingValue);
 
+                /*
                 if(placeObject.getPlaceAddress().length() > 1) {
                     address.setText(placeObject.getPlaceAddress());
                 } else {
                     address.setText(placeObject.getPlaceVicinity());
                 }
+                */
+                address.setText(placeObject.getPlaceVicinity());
 
 
             }
@@ -113,6 +131,10 @@ public class PlaceListActivity extends ActionBarActivity {
             @Override
             public void PositiveMethod(View v) {
                 Log.i(TAG, "lat = " +obj.getPlaceGeoLat() + " lng = " +obj.getPlaceGeoLng());
+                Uri gmmIntentUri = Uri.parse("geo:"+obj.getPlaceGeoLat() +","+obj.getPlaceGeoLng()+"?q=restaurants");
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                startActivity(mapIntent);
             }
 
             @Override
@@ -121,4 +143,6 @@ public class PlaceListActivity extends ActionBarActivity {
             }
         });
     }
+
+
 }

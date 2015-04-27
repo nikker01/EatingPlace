@@ -9,18 +9,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/shape_frame"
+        android:layout_marginTop="10dp"
         android:layout_marginLeft="15dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp">
+        android:layout_marginRight="10dp">
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content" >
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/img_icon_view"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignBottom="@+id/info_layout"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true" />
 
@@ -30,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:paddingBottom="8dp"
-                android:paddingTop="8dp">
+                android:paddingTop="2dp">
 
                 <com.android.volley.toolbox.NetworkImageView
                     android:id="@+id/img_place_view"
@@ -42,6 +45,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingRight="10dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="10dp"
                     android:orientation="vertical">
