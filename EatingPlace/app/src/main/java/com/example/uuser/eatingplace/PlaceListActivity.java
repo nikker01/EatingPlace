@@ -16,6 +16,8 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 
 import application.utility.Constants;
+import application.utility.IGenericDialogUtil;
+import application.utility.Util;
 import application.utility.VolleySingleton;
 import eatingplace.objects.PlaceObject;
 import eatingplace.views.CommonAdapter;
@@ -95,7 +97,27 @@ public class PlaceListActivity extends ActionBarActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.i(TAG, "lat = " + Constants.nearPlaces.get(position).getPlaceGeoLat() + " lng = " + Constants.nearPlaces.get(position).getPlaceGeoLng());
+                //Log.i(TAG, "lat = " + Constants.nearPlaces.get(position).getPlaceGeoLat() + " lng = " + Constants.nearPlaces.get(position).getPlaceGeoLng());
+                showDialog(Constants.nearPlaces.get(position));
+            }
+        });
+    }
+
+    private void showDialog(final PlaceObject obj) {
+        String title = obj.getPlaceName();
+        String msg = getResources().getString(R.string.dialog_msg_open_map);
+        String positiveBtn = getResources().getString(R.string.btn_ok);
+        String negativeBtn = getResources().getString(R.string.btn_cancel);
+
+        Util.pushGeneralDialog(this, title, msg, positiveBtn, negativeBtn, new IGenericDialogUtil.IMaterialBtnClick() {
+            @Override
+            public void PositiveMethod(View v) {
+                Log.i(TAG, "lat = " +obj.getPlaceGeoLat() + " lng = " +obj.getPlaceGeoLng());
+            }
+
+            @Override
+            public void NegativeMethod(View v) {
+
             }
         });
     }
