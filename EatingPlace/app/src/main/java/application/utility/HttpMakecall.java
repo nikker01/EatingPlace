@@ -36,6 +36,8 @@ public class HttpMakecall {
 
     public static String makeCall(String url) {
 
+        Log.i("HttpMakecall", "make call url = "+url);
+
         // string buffers the url
         StringBuffer buffer_string = new StringBuffer(url);
         String replyString = "";

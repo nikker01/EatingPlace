@@ -5,13 +5,40 @@ package eatingplace.objects;
  */
 public class PlaceObject {
 
-    String placeIconUrl;
-    String placeName;
-    String placeId;
-    String placeRating;
-    String placeRef;
-    String placeVicinity;
-    String placeAddress;
+    String placeIconUrl = "";
+    String placeName = "";
+    String placeId = "";
+    String placeRating = "0";
+    String placeRef = "";
+    String placeVicinity = "";
+    String placeAddress = "";
+    String placePhotoUrl = "";
+    String placeGeoLat = "";
+    String placeGeoLng = "";
+
+    public String getPlaceGeoLat() {
+        return placeGeoLat;
+    }
+
+    public void setPlaceGeoLat(String placeGeoLat) {
+        this.placeGeoLat = placeGeoLat;
+    }
+
+    public String getPlaceGeoLng() {
+        return placeGeoLng;
+    }
+
+    public void setPlaceGeoLng(String placeGeoLng) {
+        this.placeGeoLng = placeGeoLng;
+    }
+
+    public String getPlacePhotoUrl() {
+        return placePhotoUrl;
+    }
+
+    public void setPlacePhotoUrl(String placePhotoUrl) {
+        this.placePhotoUrl = placePhotoUrl;
+    }
 
     public String getPlaceAddress() {
         return placeAddress;

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.location.LocationManager;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -36,7 +39,9 @@ import java.util.concurrent.TimeUnit;
 
 import application.utility.Constants;
 import application.utility.HttpMakecall;
+import application.utility.JsonParserTool;
 import application.utility.PreferenceUtil;
+import application.utility.Util;
 import location.service.LocationListenerGPS;
 import location.service.LocationListenerWIFI;
 import location.service.LocationSingleton;
@@ -95,6 +100,7 @@ public class MainActivity extends ActionBarActivity implements
             });
         }
         */
+
 
         FloatingActionButton searchNear = (FloatingActionButton) findViewById(R.id.searchNear);
         FloatingActionButton searchText = (FloatingActionButton) findViewById(R.id.searchText);
@@ -205,6 +211,8 @@ public class MainActivity extends ActionBarActivity implements
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.searchNear: {
+                    Util.showProgressDialog(MainActivity.this, "", "");
+                    ((FloatingActionsMenu) findViewById(R.id.searchMenu)).collapse();
                     requestByMethodName(Constants.callMethods.getNearPlace);
                     break;
                 }
@@ -215,6 +223,7 @@ public class MainActivity extends ActionBarActivity implements
         }
     };
 
+    private static final int METHOD_NEAR_PLACE = 10001;
     private void requestByMethodName(final Constants.callMethods method) {
         new Thread() {
             @Override
@@ -223,7 +232,7 @@ public class MainActivity extends ActionBarActivity implements
                     String url = "";
                     try {
                         url = "https://maps.googleapis.com/maps/api/place/search/json?location=" + Constants.userLatitude + "," + Constants.userLongitude +
-                                "&radius=100&types=" + URLEncoder.encode("food|bakery|cafe|restaurant|meal_delivery|meal_takeaway", "UTF-8") + "&key=" +
+                                "&radius=300&types=" + URLEncoder.encode("food|bakery|cafe|restaurant|meal_delivery|meal_takeaway", "UTF-8") + "&key=" +
                                 Constants.WEB_SERVICE_KEY;
 
                     } catch (Exception e) {
@@ -232,11 +241,40 @@ public class MainActivity extends ActionBarActivity implements
 
                     String res = HttpMakecall.makeCall(url);
                     Log.i(TAG, "getNearPlace res = " + res);
+                    try {
+                        JsonParserTool.parseNearPlace(res);
+
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+                    Message msg = new Message();
+                    msg.arg1 = METHOD_NEAR_PLACE;
+                    handler.sendMessage(msg);
                 }
             }
         }.start();
 
     }
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+        switch (msg.arg1) {
+            case METHOD_NEAR_PLACE: {
+                //go to near place search
+                Util.dismissProgressDialog();
+                Intent i = new Intent();
+                i.setClass(MainActivity.this, PlaceListActivity.class);
+                i.putExtra("searchBy", "near");
+                startActivity(i);
+                break;
+            }
+
+        }
+        }
+    };
 
 
     // Location callback by locationListenerWIFI
