@@ -5,11 +5,15 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_location_singleton">LocationSingleton</string>
 
+    <!-- **************************************************************************************** -->
     <string name="dialog_msg_open_map">是否打開地圖?</string>
-
+    <string name="dialog_msg_add_favorite">是否加入最愛?</string>
 
     <!-- **************************************************************************************** -->
     <string name="btn_ok">確認</string>
     <string name="btn_cancel">取消</string>
+
+    <!-- **************************************************************************************** -->
+    <string name="toast_msg_add_favorite_succes">加入成功</string>
 
 </resources>

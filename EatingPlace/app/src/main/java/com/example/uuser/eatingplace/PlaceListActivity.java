@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -23,6 +24,7 @@ import application.utility.Constants;
 import application.utility.IGenericDialogUtil;
 import application.utility.Util;
 import application.utility.VolleySingleton;
+import eatingplace.database.PlaceDatabaseProxy;
 import eatingplace.objects.PlaceObject;
 import eatingplace.views.CommonAdapter;
 import eatingplace.views.CommonViewHolder;
@@ -37,6 +39,7 @@ public class PlaceListActivity extends ActionBarActivity {
     CommonAdapter<PlaceObject> adapter;
     ImageLoader mImageLoader;
     RequestQueue queue;
+    PlaceDatabaseProxy prxoy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,31 +52,45 @@ public class PlaceListActivity extends ActionBarActivity {
         queue = VolleySingleton.getInstance().getRequestQueue();
         mImageLoader = VolleySingleton.getInstance().getImageLoader();
 
+
+
         initViews();
     }
 
-    /*
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        //menu.clear();
-        super.onCreateOptionsMenu(menu, inflater);
-
-        getSupportActionBar().getMenuInflater().inflate(R.menu.shopping, menu);
-
+    public void onResume(){
+        super.onResume();
+        prxoy = new PlaceDatabaseProxy(this);
     }
 
-*/
+    @Override
+    public void onStop(){
+        super.onStop();
+        prxoy.closeDB();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_place_list, menu);
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 this.finish();
                 return true;
+            case R.id.action_add_favorite:
+                goToMap();
+                return true;
 
             default:
                 return true;
         }
     }
+
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void initViews() {
@@ -123,18 +140,16 @@ public class PlaceListActivity extends ActionBarActivity {
 
     private void showDialog(final PlaceObject obj) {
         String title = obj.getPlaceName();
-        String msg = getResources().getString(R.string.dialog_msg_open_map);
+        String msg = getResources().getString(R.string.dialog_msg_add_favorite);
         String positiveBtn = getResources().getString(R.string.btn_ok);
         String negativeBtn = getResources().getString(R.string.btn_cancel);
 
         Util.pushGeneralDialog(this, title, msg, positiveBtn, negativeBtn, new IGenericDialogUtil.IMaterialBtnClick() {
             @Override
             public void PositiveMethod(View v) {
-                Log.i(TAG, "lat = " +obj.getPlaceGeoLat() + " lng = " +obj.getPlaceGeoLng());
-                Uri gmmIntentUri = Uri.parse("geo:"+obj.getPlaceGeoLat() +","+obj.getPlaceGeoLng()+"?q=restaurants");
-                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                mapIntent.setPackage("com.google.android.apps.maps");
-                startActivity(mapIntent);
+                long res = prxoy.insertData(obj);
+                if(res != -1)
+                    Toast.makeText(PlaceListActivity.this, getResources().getString(R.string.toast_msg_add_favorite_succes), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -144,5 +159,12 @@ public class PlaceListActivity extends ActionBarActivity {
         });
     }
 
+    private void goToMap() {
+
+        Uri gmmIntentUri = Uri.parse("geo:"+Constants.userLatitude+","+Constants.userLongitude+"?q=restaurants");
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+        startActivity(mapIntent);
+    }
 
 }
