@@ -103,7 +103,9 @@ public class MainActivity extends ActionBarActivity implements
 
 
         FloatingActionButton searchNear = (FloatingActionButton) findViewById(R.id.searchNear);
+        searchNear.setIcon(R.mipmap.icon_location_32);
         FloatingActionButton searchText = (FloatingActionButton) findViewById(R.id.searchText);
+        searchText.setIcon(R.mipmap.icon_text_32);
 
         searchNear.setOnClickListener(fabtnClick);
 

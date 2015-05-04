@@ -5,27 +5,27 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_frame"
-        android:layout_marginTop="10dp"
         android:layout_marginLeft="15dp"
-        android:layout_marginRight="10dp">
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/shape_frame"
+        android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/img_icon_view"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="10dp"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_alignBottom="@+id/info_layout"
                 android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true" />
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginRight="10dp" />
 
             <LinearLayout
                 android:id="@+id/info_layout"
@@ -45,10 +45,10 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingRight="10dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="10dp"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingRight="10dp">
 
                     <TextView
                         android:id="@+id/txt_place_name"
@@ -75,7 +75,7 @@
 
         </RelativeLayout>
 
-        </LinearLayout>
+    </LinearLayout>
 
 
 </LinearLayout>

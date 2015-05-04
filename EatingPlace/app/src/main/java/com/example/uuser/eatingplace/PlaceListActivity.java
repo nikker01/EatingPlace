@@ -19,6 +19,10 @@ import android.widget.Toast;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.github.ksoichiro.android.observablescrollview.ObservableListView;
+import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
+import com.github.ksoichiro.android.observablescrollview.ScrollState;
+import com.nineoldandroids.view.ViewHelper;
 
 import application.utility.Constants;
 import application.utility.IGenericDialogUtil;
@@ -26,16 +30,17 @@ import application.utility.Util;
 import application.utility.VolleySingleton;
 import eatingplace.database.PlaceDatabaseProxy;
 import eatingplace.objects.PlaceObject;
+import eatingplace.views.BaseObserveScrollActivity;
 import eatingplace.views.CommonAdapter;
 import eatingplace.views.CommonViewHolder;
 
 /**
  * Created by Uuser on 2015/4/27.
  */
-public class PlaceListActivity extends ActionBarActivity {
+public class PlaceListActivity extends BaseObserveScrollActivity implements ObservableScrollViewCallbacks {
 
     private static final String TAG = "PlaceListActivity";
-    ListView listView;
+    ObservableListView listView;
     CommonAdapter<PlaceObject> adapter;
     ImageLoader mImageLoader;
     RequestQueue queue;
@@ -46,13 +51,13 @@ public class PlaceListActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_list);
 
-        listView = (ListView)findViewById(R.id.listView);
+        listView = (ObservableListView )findViewById(R.id.listView);
+        listView.setScrollViewCallbacks(this);
+        //setDummyData(listView);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         queue = VolleySingleton.getInstance().getRequestQueue();
         mImageLoader = VolleySingleton.getInstance().getImageLoader();
-
-
 
         initViews();
     }
@@ -134,6 +139,8 @@ public class PlaceListActivity extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Log.i(TAG, "lat = " + Constants.nearPlaces.get(position).getPlaceGeoLat() + " lng = " + Constants.nearPlaces.get(position).getPlaceGeoLng());
                 showDialog(Constants.nearPlaces.get(position));
+                //Intent i = new Intent(PlaceListActivity.this, PlaceDetailActivity.class);
+                //PlaceListActivity.this.startActivity(i);
             }
         });
     }
@@ -150,6 +157,7 @@ public class PlaceListActivity extends ActionBarActivity {
                 long res = prxoy.insertData(obj);
                 if(res != -1)
                     Toast.makeText(PlaceListActivity.this, getResources().getString(R.string.toast_msg_add_favorite_succes), Toast.LENGTH_LONG).show();
+                else Toast.makeText(PlaceListActivity.this, getResources().getString(R.string.toast_msg_add_favorite_fail), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -167,4 +175,25 @@ public class PlaceListActivity extends ActionBarActivity {
         startActivity(mapIntent);
     }
 
+    @Override
+    public void onScrollChanged(int scrollY, boolean b, boolean b2) {
+    }
+
+    @Override
+    public void onDownMotionEvent() {
+
+    }
+
+    @Override
+    public void onUpOrCancelMotionEvent(ScrollState scrollState) {
+        if (scrollState == ScrollState.UP) {
+            if (getSupportActionBar().isShowing()) {
+                getSupportActionBar().hide();
+            }
+        } else if (scrollState == ScrollState.DOWN) {
+            if (!getSupportActionBar().isShowing()) {
+                getSupportActionBar().show();
+            }
+        }
+    }
 }
