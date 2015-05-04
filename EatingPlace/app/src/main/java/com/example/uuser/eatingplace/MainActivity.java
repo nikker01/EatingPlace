@@ -9,9 +9,13 @@ import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -34,6 +38,7 @@ import org.apache.http.util.ByteArrayBuffer;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +50,7 @@ import application.utility.Util;
 import location.service.LocationListenerGPS;
 import location.service.LocationListenerWIFI;
 import location.service.LocationSingleton;
+import me.drakeet.materialdialog.MaterialDialog;
 
 
 public class MainActivity extends ActionBarActivity implements
@@ -53,6 +59,7 @@ public class MainActivity extends ActionBarActivity implements
 
     public static String TAG = "MainActivity";
 
+    private handler mHandler = null;
     public static LocationManager locationManager;
     public static LocationListenerGPS locationListenerGPS;
     public static LocationListenerWIFI locationListenerWIFI;
@@ -64,6 +71,8 @@ public class MainActivity extends ActionBarActivity implements
 
     double mBeginCoordinateX, mBeginCoordinateY, mEndCoordinateX, mEndCoordinateY;
 
+    private String userSearchText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +81,7 @@ public class MainActivity extends ActionBarActivity implements
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListenerGPS = new LocationListenerGPS(this);
         locationListenerWIFI = new LocationListenerWIFI(this);
+        mHandler = new handler(this);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Places.GEO_DATA_API).addApi(Places.PLACE_DETECTION_API)
@@ -108,7 +118,7 @@ public class MainActivity extends ActionBarActivity implements
         searchText.setIcon(R.mipmap.icon_text_32);
 
         searchNear.setOnClickListener(fabtnClick);
-
+        searchText.setOnClickListener(fabtnClick);
     }
 
     @Override
@@ -218,14 +228,43 @@ public class MainActivity extends ActionBarActivity implements
                     requestByMethodName(Constants.callMethods.getNearPlace);
                     break;
                 }
+
                 case R.id.searchText: {
+                    ((FloatingActionsMenu) findViewById(R.id.searchMenu)).collapse();
+                    LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View view = inflater.inflate(R.layout.dialog_search_name, null);
+                    final MaterialDialog mMaterialDialog = new MaterialDialog(MainActivity.this).setView(view);
+                    mMaterialDialog.show();
+
+                    final EditText searchName = (EditText)view.findViewById(R.id.editText_search_name);
+                    TextView cancel = (TextView)view.findViewById(R.id.txt_btn_cancel);
+                    TextView confirm = (TextView)view.findViewById(R.id.txt_btn_confirm);
+                    cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mMaterialDialog.dismiss();
+                        }
+                    });
+                    confirm.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            userSearchText = searchName.getText().toString();
+                            Log.i("search", "name = "+userSearchText);
+                            mMaterialDialog.dismiss();
+                            Util.showProgressDialog(MainActivity.this, "", "");
+                            requestByMethodName(Constants.callMethods.getTextSearchPlace);
+                        }
+                    });
+
                     break;
                 }
             }
         }
     };
 
+
     private static final int METHOD_NEAR_PLACE = 10001;
+    private static final int METHOD_SEARCH_TEXT = 10002;
     private void requestByMethodName(final Constants.callMethods method) {
         new Thread() {
             @Override
@@ -245,7 +284,6 @@ public class MainActivity extends ActionBarActivity implements
                     Log.i(TAG, "getNearPlace res = " + res);
                     try {
                         JsonParserTool.parseNearPlace(res);
-
                     } catch(Exception e) {
                         e.printStackTrace();
                     }
@@ -253,13 +291,88 @@ public class MainActivity extends ActionBarActivity implements
 
                     Message msg = new Message();
                     msg.arg1 = METHOD_NEAR_PLACE;
-                    handler.sendMessage(msg);
+                    mHandler.sendMessage(msg);
+                } else if(method.equals(Constants.callMethods.getTextSearchPlace)) {
+                    String url = "";
+                    try {
+                        url = "https://maps.googleapis.com/maps/api/place/search/json?location=" + Constants.userLatitude + "," + Constants.userLongitude +
+                                "&radius=300&types=" + URLEncoder.encode("food|bakery|cafe|restaurant|meal_delivery|meal_takeaway", "UTF-8")
+                                + "&name=" + userSearchText
+                                + "&key=" + Constants.WEB_SERVICE_KEY;
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    String res = HttpMakecall.makeCall(url);
+                    Log.i(TAG, "getTextSearch res = " + res);
+
+                    try {
+                        JsonParserTool.parseNearPlace(res);
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    Message msg = new Message();
+                    msg.arg1 = METHOD_SEARCH_TEXT;
+                    mHandler.sendMessage(msg);
+
                 }
             }
         }.start();
 
     }
 
+    private static class handler extends Handler {
+        private final WeakReference<MainActivity> mActivity;
+
+        public handler(MainActivity activity) {
+            mActivity = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            MainActivity activity = mActivity.get();
+            switch (msg.arg1) {
+                case METHOD_NEAR_PLACE: {
+                    //go to near place search
+                    Util.dismissProgressDialog();
+                    if(Constants.nearPlaces.size() > 0) {
+                        Intent i = new Intent();
+                        i.setClass(activity, PlaceListActivity.class);
+                        i.putExtra("searchBy", "near");
+                        activity.startActivity(i);
+                    } else {
+                        activity.toastSearchError();
+                    }
+
+                    break;
+                }
+                case METHOD_SEARCH_TEXT: {
+                    Util.dismissProgressDialog();
+                    if(Constants.nearPlaces.size() > 0) {
+                        Intent i = new Intent();
+                        i.setClass(activity, PlaceListActivity.class);
+                        i.putExtra("searchBy", "text");
+                        activity.startActivity(i);
+                    } else {
+                        activity.toastSearchError();
+                    }
+
+                    break;
+                }
+
+            }
+        }
+
+
+    }
+
+    public void toastSearchError() {
+        Toast.makeText(this, getString(R.string.toast_msg_search_error), Toast.LENGTH_LONG).show();
+    }
+
+    /*
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -273,10 +386,15 @@ public class MainActivity extends ActionBarActivity implements
                 startActivity(i);
                 break;
             }
-
+            case METHOD_SEARCH_TEXT: {
+                break;
+            }
+            default:
+                break;
         }
         }
     };
+    */
 
 
     // Location callback by locationListenerWIFI

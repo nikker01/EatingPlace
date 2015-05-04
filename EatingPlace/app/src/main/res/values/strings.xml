@@ -14,7 +14,9 @@
     <string name="btn_cancel">取消</string>
 
     <!-- **************************************************************************************** -->
+
+    <string name="toast_msg_search_error">搜尋失敗,稍後再試或更改搜尋方式</string>
     <string name="toast_msg_add_favorite_succes">加入成功</string>
-    <string name="toast_msg_add_favorite_fail">加入失敗, 重複加入或其他問題</string>
+    <string name="toast_msg_add_favorite_fail">加入失敗,重複加入或其他問題</string>
 
 </resources>
