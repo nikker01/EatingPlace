@@ -45,6 +45,9 @@ public class PlaceListActivity extends BaseObserveScrollActivity implements Obse
     ImageLoader mImageLoader;
     RequestQueue queue;
     PlaceDatabaseProxy prxoy;
+    String name;
+    String searchBy;
+    String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,12 @@ public class PlaceListActivity extends BaseObserveScrollActivity implements Obse
 
         listView = (ObservableListView )findViewById(R.id.listView);
         listView.setScrollViewCallbacks(this);
+
+        searchBy = getIntent().getStringExtra("searchBy");
+        url = getIntent().getStringExtra("url");
+        if(searchBy.equals("text")) {
+            name = getIntent().getStringExtra("name");
+        }
         //setDummyData(listView);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -169,10 +178,19 @@ public class PlaceListActivity extends BaseObserveScrollActivity implements Obse
 
     private void goToMap() {
 
-        Uri gmmIntentUri = Uri.parse("geo:"+Constants.userLatitude+","+Constants.userLongitude+"?q=restaurants");
+
+        Uri gmmIntentUri = null; // = Uri.parse("geo:"+Constants.userLatitude+","+Constants.userLongitude+"?q=restaurants");
+
+        if(searchBy.equals("near")) {
+            gmmIntentUri = Uri.parse("geo:"+Constants.userLatitude+","+Constants.userLongitude+"?q=restaurants");
+        } else if(searchBy.equals("text")) {
+            gmmIntentUri = Uri.parse("geo:"+Constants.userLatitude+","+Constants.userLongitude+"?q="+name);
+        }
+
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
         startActivity(mapIntent);
+
     }
 
     @Override

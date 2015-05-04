@@ -71,7 +71,8 @@ public class MainActivity extends ActionBarActivity implements
 
     double mBeginCoordinateX, mBeginCoordinateY, mEndCoordinateX, mEndCoordinateY;
 
-    private String userSearchText;
+    public String userSearchText;
+    public String searchUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -273,9 +274,10 @@ public class MainActivity extends ActionBarActivity implements
                     String url = "";
                     try {
                         url = "https://maps.googleapis.com/maps/api/place/search/json?location=" + Constants.userLatitude + "," + Constants.userLongitude +
-                                "&radius=300&types=" + URLEncoder.encode("food|bakery|cafe|restaurant|meal_delivery|meal_takeaway", "UTF-8") + "&key=" +
-                                Constants.WEB_SERVICE_KEY;
-
+                                "&radius=300&types=" + URLEncoder.encode("food|bakery|cafe|restaurant|meal_delivery|meal_takeaway", "UTF-8")
+                                + "&language=zh-TW"
+                                + "&key=" + Constants.WEB_SERVICE_KEY;
+                        searchUrl = url;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -298,7 +300,10 @@ public class MainActivity extends ActionBarActivity implements
                         url = "https://maps.googleapis.com/maps/api/place/search/json?location=" + Constants.userLatitude + "," + Constants.userLongitude +
                                 "&radius=300&types=" + URLEncoder.encode("food|bakery|cafe|restaurant|meal_delivery|meal_takeaway", "UTF-8")
                                 + "&name=" + userSearchText
+                                + "&language=zh-TW"
                                 + "&key=" + Constants.WEB_SERVICE_KEY;
+
+                        searchUrl = url;
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -340,6 +345,7 @@ public class MainActivity extends ActionBarActivity implements
                     if(Constants.nearPlaces.size() > 0) {
                         Intent i = new Intent();
                         i.setClass(activity, PlaceListActivity.class);
+                        i.putExtra("url", activity.searchUrl);
                         i.putExtra("searchBy", "near");
                         activity.startActivity(i);
                     } else {
@@ -353,7 +359,9 @@ public class MainActivity extends ActionBarActivity implements
                     if(Constants.nearPlaces.size() > 0) {
                         Intent i = new Intent();
                         i.setClass(activity, PlaceListActivity.class);
+                        i.putExtra("url", activity.searchUrl);
                         i.putExtra("searchBy", "text");
+                        i.putExtra("name", activity.userSearchText);
                         activity.startActivity(i);
                     } else {
                         activity.toastSearchError();
